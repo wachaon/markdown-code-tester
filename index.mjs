@@ -28,9 +28,11 @@ function markdownCodeTester(markdown) {
 
 function codeTester(code) {
     const source = transpile(code)
+    console.debug('[source]:\n%s', source)
+
     const spec = resolve(__dirname, genGUID() + '.mjs')
+    writeFileSync(spec, source, 'UTF-8')
     try {
-        writeFileSync(spec, source, 'UTF-8')
         require(spec)
         console.log('%s\n%s// =>%s %O\n', code, gray, clear, true)
     } catch (e) {
