@@ -23,14 +23,14 @@ const two = 2
 console.log(() => one + two) /* => 3 */
 ```
 ````
-と記述すると下記の用になります。
+と記述すると下記の通りに表示は一般的なコードブロックになります。
 
 ```javascript {"testing": true}
 const one = 1
 const two = 2
 console.log(() => one + two) /* => 3 */
 ```
-あとは下記のように *markdownCodeTester* を読み込んで指定してください。
+あとは下記のように *README.md* を読み込んで、*markdownCodeTester* に適用してください。
 
 ```javascript
 // built-ins
@@ -38,7 +38,15 @@ import { readFileSync } from 'filesystem'
 import { resolve } from 'pathname'
 import tester from 'markdownCodeTester'
 
-const md = readFileSync(resolve(process.cwd(), 'README.md'), 'UTF-8')
+const readme = readFileSync(resolve(process.cwd(), 'README.md'), 'UTF-8')
 
-tester(md)
+tester(readme)
+```
+内部では下記のようにコードブロックがトランスパイルされテストされます。
+
+```javascript
+import { assert } from 'minitest';
+const one = 1;
+const two = 2;
+assert.equal(3, (() => one + two)());
 ```
