@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, deleteFileSync } from 'filesystem'
 import { resolve } from 'pathname'
 import { gray, clear } from 'ansi'
 import genGUID from 'genGUID'
+import { NONE } from 'text'
 
 // unified
 import { unified } from 'unified'
@@ -14,6 +15,7 @@ import { parse } from '@babel/parser'
 import { default as traverse } from '@babel/traverse'
 import { default as generator } from '@babel/generator'
 
+// main
 function markdownCodeTester(markdown) {
     fromMarkdown(markdown)
         .children
@@ -26,6 +28,7 @@ function markdownCodeTester(markdown) {
         })
 }
 
+// トランスパイルしたコードを基にテストをする
 function codeTester(code) {
     const source = transpile(code)
     console.debug('[source]:\n%s', source)
@@ -43,6 +46,7 @@ function codeTester(code) {
     return code
 }
 
+// トランスパイル
 function transpile(script) {
     // option の設定
     const option = { sourceType: 'module' }
@@ -64,10 +68,13 @@ function transpile(script) {
                     && node.arguments[0].params.length === 0
                 ) {
                     // 末尾コメントから期待値を取得
-                    const expected = parent.trailingComments[0].value.replace(' => ', '')
+                    const expected = parent.trailingComments[0].value.replace(/\s*=>\s*/, NONE)
+
+                    // 実際の値を取得
+                    const actual = generator(node.arguments[0]).code
 
                     // assert.equal を文字列で生成
-                    const equal = 'assert.equal(' + expected + ',(' + generator(node.arguments[0]).code + ')())'
+                    const equal = `assert.equal(${expected},(${actual})())`
 
                     // ast として生成
                     parent.expression = parse(equal).program.body[0].expression
@@ -81,16 +88,12 @@ function transpile(script) {
 
     // assertオブジェクトを導入
     ast.program.body.unshift(
-        parse(`import { assert } from 'minitest'`, option).program.body[0]
+        parse("import { assert } from 'minitest'", option).program.body[0]
     )
     return generator(ast).code
 
 }
 
-markdownCodeTester.codeTester = codeTester
-module.exports = markdownCodeTester
-
-// util
 // markdown を ast に変換
 function fromMarkdown(markdown) {
     return unified()
@@ -98,3 +101,7 @@ function fromMarkdown(markdown) {
         .use(gfm)
         .parse(markdown)
 }
+
+// 登録
+markdownCodeTester.codeTester = codeTester
+module.exports = markdownCodeTester
