@@ -25,11 +25,12 @@ console.log(() => one + two) /* => 3 */
 ````
 と記述すると下記の通りに表示は一般的なコードブロックになります。
 
-```javascript {"testing": true}
+```javascript {"testing": true, "message": "1 puls 2 equal 3"}
 const one = 1
 const two = 2
 console.log(() => one + two) /* => 3 */
 ```
+
 あとは下記のように *README.md* を読み込んで、*markdownCodeTester* に適用してください。
 
 ```javascript
@@ -49,4 +50,13 @@ import { assert } from 'minitest';
 const one = 1;
 const two = 2;
 assert.equal(3, (() => one + two)());
+```
+
+## テストに合格しなかったアイテムの表示
+
+```javascript {"testing": true, "message": "2 by 3 equal 5"}
+const two = 2
+const three = 3
+
+console.log(() => two * three) // => 5
 ```
