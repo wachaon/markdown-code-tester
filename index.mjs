@@ -54,9 +54,9 @@ function markdownCodeTester(markdown) {
             } else {
                 try {
                     codeTester(value)
-                    console.log(`${INDENT.repeat(col)}${brightGreen}${CHECKMARK} ${gray}${message || NONE}`)
+                    console.log(`${INDENT.repeat(col - 1)}  ${brightGreen}${CHECKMARK} ${gray}${message || NONE}`)
                 } catch (e) {
-                    console.log(`${INDENT.repeat(col)}  ${message || NONE} ${gray}// =>${clear} ${e.message}`)
+                    console.log(`${INDENT.repeat(col - 1)}    ${message || NONE} ${gray}// =>${clear} ${e.message}`)
                 }
             }
         })
