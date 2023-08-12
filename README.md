@@ -54,6 +54,8 @@ assert.equal(3, (() => one + two)());
 
 ## テストに合格しなかったアイテムの表示
 
+テストに合格しなかったアイテムは強調表示されます。
+
 ```javascript {"testing": true, "message": "2 by 3 equal 5"}
 const two = 2
 const three = 3

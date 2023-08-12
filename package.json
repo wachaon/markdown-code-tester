@@ -1,6 +1,6 @@
 {
   "name": "markdowncodetester",
-  "version": "0.１.0",
+  "version": "0.１.1",
   "description": "Extract and test code blocks in markdown",
   "main": "index.mjs",
   "scripts": {
