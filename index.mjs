@@ -1,14 +1,18 @@
 // bilt-ins
 import { readFileSync, writeFileSync, deleteFileSync } from 'filesystem'
 import { resolve } from 'pathname'
-import { gray, clear } from 'ansi'
+import { gray, brightGreen, red, clear } from 'ansi'
 import genGUID from 'genGUID'
-import { NONE } from 'text'
+import { NONE, rCR, CHECKMARK } from 'text'
+
+const INDENT = "    "
 
 // unified
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import gfm from 'remark-gfm'
+import inspect from 'unist-util-inspect'
+import remarkStringify from 'remark-stringify'
 
 // babel
 import { parse } from '@babel/parser'
@@ -17,13 +21,43 @@ import { default as generator } from '@babel/generator'
 
 // main
 function markdownCodeTester(markdown) {
+    // インデントの深さを定義
+    let col = 0
+
     fromMarkdown(markdown)
         .children
-        .filter(node => node.type === 'code')
-        .forEach(code => {
-            if (code.meta != null) {
-                const meta = JSON.parse(code.meta)
-                if (meta.testing) codeTester(code.value)
+        // 必要なノードのみにする
+        .filter(node => (node.type === 'code' && node.meta != null && JSON.parse(node.meta).testing) || node.type === 'heading')
+        .map(node => {
+            // heading と code それぞれ必要な情報のみ摘出する
+            const { type, depth, value, meta } = node
+            if (type === 'code') {
+                return {
+                    type,
+                    value,
+                    message: JSON.parse(meta).message
+                }
+            } else {
+                return {
+                    type,
+                    depth,
+                    value: toMarkdown(node),
+                }
+            }
+        })
+        .forEach(node => {
+            // 表示処理
+            const { type, depth, value, message } = node
+            if (type === 'heading') {
+                console.log(`\n${gray}${INDENT.repeat(depth - 1)}${value.replace(/(\r?\n)+$/, NONE)}`)
+                col = depth
+            } else {
+                try {
+                    codeTester(value)
+                    console.log(`${INDENT.repeat(col)}${brightGreen}${CHECKMARK} ${gray}${message || NONE}`)
+                } catch (e) {
+                    console.log(`${INDENT.repeat(col)}  ${message || NONE} ${gray}// =>${clear} ${e.message}`)
+                }
             }
         })
 }
@@ -31,13 +65,10 @@ function markdownCodeTester(markdown) {
 // トランスパイルしたコードを基にテストをする
 function codeTester(code) {
     const source = transpile(code)
-    console.debug('[source]:\n%s', source)
-
     const spec = resolve(__dirname, genGUID() + '.mjs')
     writeFileSync(spec, source, 'UTF-8')
     try {
         require(spec)
-        console.log('%s\n%s// =>%s %O\n', code, gray, clear, true)
     } catch (e) {
         throw e
     } finally {
@@ -74,7 +105,7 @@ function transpile(script) {
                     const actual = generator(node.arguments[0]).code
 
                     // assert.equal を文字列で生成
-                    const equal = `assert.equal(${expected},(${actual})())`
+                    const equal = `assert.equal(${expected}, (${actual})())`
 
                     // ast として生成
                     parent.expression = parse(equal).program.body[0].expression
@@ -94,7 +125,11 @@ function transpile(script) {
 
 }
 
-// markdown を ast に変換
+/**
+ * *markdown* を *mdast* に変換
+ * @param {string} markdown - *markdown*
+ * @returns {mdast} *mdast*
+ */
 function fromMarkdown(markdown) {
     return unified()
         .use(remarkParse)
@@ -102,6 +137,17 @@ function fromMarkdown(markdown) {
         .parse(markdown)
 }
 
+/**
+ * *mdast* を *markdown* に変換
+ * @param {mdast} mdast - *html* の 抽象構文木
+ * @returns {string} *markdown*
+ */
+function toMarkdown(mdast) {
+    return unified()
+        .use(remarkStringify)
+        .use(gfm)
+        .stringify(mdast)
+}
+
 // 登録
-markdownCodeTester.codeTester = codeTester
 module.exports = markdownCodeTester
