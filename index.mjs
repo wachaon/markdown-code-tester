@@ -1,9 +1,9 @@
 // bilt-ins
-import { readFileSync, writeFileSync, deleteFileSync } from 'filesystem'
+import { writeFileSync, deleteFileSync } from 'filesystem'
 import { resolve } from 'pathname'
-import { gray, brightGreen, red, clear } from 'ansi'
+import { gray, brightGreen, clear } from 'ansi'
 import genGUID from 'genGUID'
-import { NONE, rCR, CHECKMARK } from 'text'
+import { NONE, LF, CHECKMARK } from 'text'
 
 const INDENT = "    "
 
