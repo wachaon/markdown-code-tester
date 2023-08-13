@@ -30,12 +30,16 @@ function markdownCodeTester(markdown) {
         .filter(node => (node.type === 'code' && node.meta != null && JSON.parse(node.meta).testing) || node.type === 'heading')
         .map(node => {
             // heading と code それぞれ必要な情報のみ摘出する
-            const { type, depth, value, meta } = node
+            const { type, depth, value } = node
             if (type === 'code') {
+                const meta = JSON.parse(node.meta)
+                let { message, imports = [] } = meta
+                const source = (imports.concat("import { assert } from 'minitest'")).join(LF) + LF + value
                 return {
                     type,
-                    value,
-                    message: JSON.parse(meta).message
+                    value: source,
+                    message,
+                    imports,
                 }
             } else {
                 return {
@@ -117,12 +121,7 @@ function transpile(script) {
         }
     })
 
-    // assertオブジェクトを導入
-    ast.program.body.unshift(
-        parse("import { assert } from 'minitest'", option).program.body[0]
-    )
     return generator(ast).code
-
 }
 
 /**
