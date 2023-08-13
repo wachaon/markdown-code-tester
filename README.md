@@ -1,23 +1,26 @@
-# *markdownCodeTester*
+# *markdown-code-tester*
 
-*markdownCodeTester* は [*wes*](https://github.com/wachaon/wes) 用のモジュールで、*markdown* のコードブロックをテスト検証します。
+*markdown-code-tester* は [*wes*](https://github.com/wachaon/wes) 用のモジュールで、*markdown* のコードブロックをテスト検証します。
 
 ## install
 [*wes*](https://github.com/wachaon/wes) がインストールされている状態で下記のコマンドを実行してください。
 
 ```bin
-wes install @wachaon/markdownCodeTester --bare
+wes install @wachaon/markdown-code-tester --bare
 ```
 
 ## usage
 テストは非常に簡単です。
 
-`meta` 要素に `{"testing": true}` が指定されているコードブロックをテストします。
+*code* の `meta` 要素に `{"testing": true}` が指定されているコードブロックをテストします。
 `console.log()` 内に引数を持たないアロー関数があればそれを用いてテストコードを生成し、テストします。
 テストコードは末尾コメントの値を期待値とするため、末尾コメントの記述は必須です。
+`{"message": "***"}` で記述されたメッセージをテストの項目名として出力します。
+
+テストの出力はビルトインモジュールの *minitest* に似た出力をします。
 
 ````
-```javascript {"testing": true}
+```javascript {"testing": true, "message": "1 puls 2 equal 3"}
 const one = 1
 const two = 2
 console.log(() => one + two) /* => 3 */
@@ -31,7 +34,7 @@ const two = 2
 console.log(() => one + two) /* => 3 */
 ```
 
-あとは下記のように *README.md* を読み込んで、*markdownCodeTester* に適用してください。
+あとは下記のように *README.md* を読み込んで、*markdown-code-tester* に適用してください。
 
 ```javascript
 // built-ins
