@@ -86,7 +86,7 @@ function transpile(script) {
     // option の設定
     const option = { sourceType: 'module' }
     // script を ast に変換
-    const ast = parse(script)
+    const ast = parse(script, option)
 
     // 変換
     traverse(ast, {
